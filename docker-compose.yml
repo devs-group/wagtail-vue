@@ -1,0 +1,38 @@
+version: "3"
+
+volumes:
+  db:
+
+services:
+  cms:
+    env_file: .env
+    build:
+      context: .
+      dockerfile: cms.dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    links:
+      - postgres
+      - frontend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.dockerfile
+    command: yarn dev
+    ports:
+      - 8080:8080
+    volumes:
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./vue:/app/vue
+      - /app/node_modules
+
+  postgres:
+    image: postgres:latest
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file: .env
